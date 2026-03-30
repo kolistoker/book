@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>MHDTVLIV</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+  <style>
+    body {
+      margin: 0;
+      background: black;
+      overflow: hidden;
+    }
+
+    #video {
+      width: 100%;
+      height: 100vh;
+      background: black;
+      object-fit: contain;
+    }
+
+    #logo {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      width: 90px;
+      opacity: 0.8;
+      z-index: 10;
+    }
+
+    #block {
+      color: white;
+      text-align: center;
+      margin-top: 20%;
+      font-size: 20px;
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+
+<img id="logo" src="https://bsports.moviesflixter.com/1000078651-Photoroom.png">
+
+<div id="block">❌ Unauthorized Access Blocked</div>
+
+<video id="video" controls autoplay playsinline></video>
+
+<script>
+  // 🔐 Allowed Domains
+  const allowedDomains = [
+    "mhdtvliv.com",
+    "durbintv.com",
+    "mhdtvp.com",
+    "neesportsliv.com"
+  ];
+
+  const ref = document.referrer;
+  let allowed = false;
+
+  for (let domain of allowedDomains) {
+    if (ref.includes(domain)) {
+      allowed = true;
+      break;
+    }
+  }
+
+  if (!allowed) {
+    document.getElementById("video").style.display = "none";
+    document.getElementById("block").style.display = "block";
+    throw new Error("Blocked!");
+  }
+
+  // 🔐 Token
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get("token");
+
+  if (token !== "12345") {
+    document.getElementById("video").style.display = "none";
+    document.getElementById("block").style.display = "block";
+    throw new Error("Invalid Token");
+  }
+
+  const videoSrc = params.get('url');
+  const video = document.getElementById('video');
+
+  // 🚀 Faster HLS Settings
+  if (Hls.isSupported()) {
+    const hls = new Hls({
+      maxBufferLength: 10,
+      maxMaxBufferLength: 30,
+      liveSyncDuration: 3,
+      liveMaxLatencyDuration: 5,
+      enableWorker: true,
+      lowLatencyMode: true
+    });
+
+    hls.loadSource(videoSrc);
+    hls.attachMedia(video);
+  } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+    video.src = videoSrc;
+  }
+
+  // ⚡ Auto Fullscreen (User interaction needed on mobile)
+  function goFullScreen() {
+    if (video.requestFullscreen) {
+      video.requestFullscreen();
+    } else if (video.webkitEnterFullscreen) {
+      video.webkitEnterFullscreen();
+    }
+  }
+
+  // 👉 First click = fullscreen
+  document.body.addEventListener("click", goFullScreen, { once: true });
+
+</script>
+
+</body>
+</html>
